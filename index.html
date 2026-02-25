@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Моя касса</title>
+    <style>
+        /* Стили такие же, как в прошлой версии */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+        body { background: #f0f2f5; padding: 20px; }
+        .app { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2196f3; margin-bottom: 20px; font-size: 28px; }
+        h2 { color: #333; margin: 0; font-size: 20px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 10px; margin: 15px 0; }
+        .section-header h2 { margin: 0; }
+        .section-content { transition: max-height 0.3s ease; overflow: hidden; }
+        .section-content.collapsed { max-height: 0; }
+        .balance-card { background: linear-gradient(135deg, #2196f3, #1976d2); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 25px; }
+        .balance-amount { font-size: 48px; font-weight: bold; }
+        .buttons { display: flex; gap: 15px; margin-bottom: 25px; }
+        button { padding: 15px 25px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        button:hover { transform: scale(1.02); filter: brightness(0.95); }
+        .expense-btn { background: #ffebee; color: #f44336; flex: 1; font-size: 18px; }
+        .income-btn { background: #e8f5e9; color: #4caf50; flex: 1; font-size: 18px; }
+        .categories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 15px; }
+        .cat-btn { background: white; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; color: #333; }
+        .cat-btn:hover { background: #2196f3; color: white; border-color: #2196f3; }
+        .progress-section { background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 15px 0; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
+        .search-box { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 10px; margin: 15px 0; font-size: 16px; }
+        .transactions-list { max-height: 400px; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 12px; }
+        .transaction-item { padding: 15px; border-bottom: 1px solid #f0f0f0; background: white; position: relative; }
+        .transaction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .transaction-category { font-size: 16px; font-weight: bold; }
+        .transaction-amount { font-weight: bold; font-size: 18px; }
+        .transaction-date { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .transaction-note { font-size: 14px; color: #666; margin: 5px 0; }
+        .delete-btn { background: #f44336; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 16px; position: absolute; top: 10px; right: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #2196f3; margin-top: 5px; }
+        .chart-item { display: flex; align-items: center; margin: 10px 0; }
+        .chart-label { width: 100px; font-size: 14px; }
+        .chart-bar { flex: 1; height: 24px; background: #e0e0e0; border-radius: 12px; margin: 0 10px; overflow: hidden; }
+        .chart-fill { height: 100%; background: #2196f3; border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 12px; }
+        .goal-item { background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 10px 0; }
+        .goal-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .goal-name { font-weight: bold; font-size: 16px; }
+        .goal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .photo-upload { margin: 10px 0; }
+        .photo-upload input { display: none; }
+        .photo-upload label { background: #e0e0e0; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: inline-block; }
+        .photo-preview { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 10px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 500px; max-width: 90%; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 15px 25px; border-radius: 10px; animation: slideUp 0.3s; z-index: 1000; }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @media (max-width: 768px) { .app { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Левая панель -->
+        <div class="panel">
+            <h1>💰 Моя касса</h1>
+            
+            <!-- Баланс -->
+            <div class="balance-card">
+                <div class="balance-amount" id="balance">0 ₽</div>
+            </div>
+            
+            <!-- Кнопки -->
+            <div class="buttons">
+                <button class="expense-btn" onclick="showExpenseForm()">➖ РАСХОД</button>
+                <button class="income-btn" onclick="showIncomeForm()">➕ ДОХОД</button>
+            </div>
+            
+            <!-- Категории -->
+            <div id="categoryBlock" style="display: none;">
+                <h2 style="margin-bottom: 15px;">Выберите категорию расхода:</h2>
+                <div class="categories" id="categories"></div>
+            </div>
+            
+            <!-- Бюджет -->
+            <div class="progress-section">
+                <h2>📊 Бюджет на месяц</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Потрачено: <span id="spentMonth">0</span> ₽</span>
+                    <span>Лимит: <span id="budgetLimit">30000</span> ₽</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="budgetProgress" style="width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Осталось: <span id="budgetRemaining">30000</span> ₽</span>
+                    <button onclick="setBudget()">Установить лимит</button>
+                </div>
+            </div>
+            
+            <!-- История операций -->
+            <div class="section-header" onclick="toggleHistory()">
+                <h2>📋 История операций</h2>
+                <span id="historyToggle">▼</span>
+            </div>
+            <div id="historyContent" class="section-content">
+                <input type="text" class="search-box" id="searchInput" placeholder="🔍 Поиск по операциям..." onkeyup="searchTransactions()">
+                <div class="transactions-list" id="transactionsList"></div>
+            </div>
+        </div>
+        
+        <!-- Правая панель -->
+        <div class="panel">
+            <h2>📊 Статистика</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div>💰 Всего доходов</div>
+                    <div class="stat-value" id="totalIncome">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div>💸 Всего расходов</div>
+                    <div class="stat-value" id="totalExpense">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div>📅 За этот месяц</div>
+                    <div class="stat-value" id="monthExpense">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div>⭐ Средний чек</div>
+                    <div class="stat-value" id="averageCheck">0 ₽</div>
+                </div>
+            </div>
+            
+            <!-- График категорий -->
+            <h2>📈 Расходы по категориям</h2>
+            <div id="categoryChart"></div>
+            
+            <!-- Цели -->
+            <div class="section-header" onclick="toggleGoals()">
+                <h2>🎯 Мои цели</h2>
+                <span id="goalsToggle">▼</span>
+            </div>
+            <div id="goalsContent" class="section-content">
+                <div id="goalsList"></div>
+                <button onclick="showGoalForm()" style="width: 100%; margin: 10px 0;">➕ Добавить цель</button>
+            </div>
+            
+            <!-- Экспорт -->
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="exportToExcel()" style="flex: 1; background: #4caf50; color: white;">📥 Скачать Excel</button>
+                <button onclick="exportToJSON()" style="flex: 1; background: #ff9800; color: white;">💾 Сохранить бэкап</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальные окна -->
+    <div id="goalModal" class="modal" style="display: none;" onclick="if(event.target===this) closeModal()">
+        <div class="modal-content">
+            <h2>🎯 Новая цель</h2>
+            <input type="text" id="goalName" placeholder="Название цели">
+            <input type="number" id="goalAmount" placeholder="Сумма">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="saveGoal()" style="flex: 1; background: #2196f3; color: white;">Сохранить</button>
+                <button onclick="closeModal()" style="flex: 1;">Отмена</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="expenseModal" class="modal" style="display: none;" onclick="if(event.target===this) closeExpenseModal()">
+        <div class="modal-content">
+            <h2>📸 Добавить расход</h2>
+            <div id="expenseCategoryDisplay" style="font-size: 18px; margin-bottom: 15px;"></div>
+            <input type="number" id="expenseAmount" placeholder="Сумма">
+            <input type="text" id="expenseNote" placeholder="Комментарий">
+            <div class="photo-upload">
+                <label for="receiptPhoto">📸 Загрузить фото чека</label>
+                <input type="file" id="receiptPhoto" accept="image/*" capture="environment" onchange="previewPhoto(event)">
+            </div>
+            <div id="photoPreview"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="saveExpenseWithPhoto()" style="flex: 1; background: #4caf50; color: white;">Сохранить</button>
+                <button onclick="closeExpenseModal()" style="flex: 1;">Отмена</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="photoModal" class="modal" style="display: none;" onclick="closePhotoModal()">
+        <img id="modalImage" src="">
+    </div>
+
+    <script>
+        // ========== ОЧИСТКА СТАРЫХ ДАННЫХ ==========
+        // Удаляем старые данные с английскими названиями
+        let oldData = localStorage.getItem('transactions');
+        if (oldData) {
+            let oldTransactions = JSON.parse(oldData);
+            // Если есть транзакции с английскими названиями - очищаем всё
+            if (oldTransactions.some(t => ['income', 'education', 'bills'].includes(t.category))) {
+                localStorage.clear();
+                console.log('Очищены старые данные');
+            }
+        }
+        
+        // ========== ДАННЫЕ ==========
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let goals = JSON.parse(localStorage.getItem('goals')) || [];
+        let budgetLimit = parseFloat(localStorage.getItem('budgetLimit')) || 30000;
+        
+        // Состояние сворачивания
+        let historyCollapsed = localStorage.getItem('historyCollapsed') === 'true';
+        let goalsCollapsed = localStorage.getItem('goalsCollapsed') === 'true';
+        
+        // Категории ТОЛЬКО на русском
+        const categories = [
+            '🍔 Еда', '🚗 Транспорт', '🎮 Развлечения',
+            '🛍️ Покупки', '📄 Счета', '🏥 Здоровье',
+            '📚 Образование', '📺 Подписки', '📦 Другое'
+        ];
+        
+        let currentCategory = '';
+        let currentPhoto = null;
+        
+        // ========== ЗАГРУЗКА ==========
+        function loadCategories() {
+            document.getElementById('categories').innerHTML = categories.map(cat => 
+                `<button class="cat-btn" onclick="selectCategory('${cat}')">${cat}</button>`
+            ).join('');
+        }
+        
+        // ========== СВОРАЧИВАНИЕ ==========
+        function toggleHistory() {
+            historyCollapsed = !historyCollapsed;
+            localStorage.setItem('historyCollapsed', historyCollapsed);
+            document.getElementById('historyToggle').innerHTML = historyCollapsed ? '▶' : '▼';
+            document.getElementById('historyContent').className = historyCollapsed ? 'section-content collapsed' : 'section-content';
+        }
+        
+        function toggleGoals() {
+            goalsCollapsed = !goalsCollapsed;
+            localStorage.setItem('goalsCollapsed', goalsCollapsed);
+            document.getElementById('goalsToggle').innerHTML = goalsCollapsed ? '▶' : '▼';
+            document.getElementById('goalsContent').className = goalsCollapsed ? 'section-content collapsed' : 'section-content';
+        }
+        
+        // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
+        function showExpenseForm() {
+            document.getElementById('categoryBlock').style.display = 'block';
+        }
+        
+        function showIncomeForm() {
+            let amount = prompt('💰 Введите сумму дохода:');
+            if (amount && !isNaN(amount) && amount > 0) {
+                let note = prompt('Комментарий:');
+                addTransaction('income', '💰 Доход', Number(amount), note || '');
+            }
+        }
+        
+        function selectCategory(category) {
+            currentCategory = category;
+            document.getElementById('expenseCategoryDisplay').innerHTML = `Категория: ${category}`;
+            document.getElementById('expenseModal').style.display = 'flex';
+            document.getElementById('categoryBlock').style.display = 'none';
+        }
+        
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhoto = e.target.result;
+                    document.getElementById('photoPreview').innerHTML = 
+                        `<img src="${e.target.result}" class="photo-preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function saveExpenseWithPhoto() {
+            let amount = document.getElementById('expenseAmount').value;
+            let note = document.getElementById('expenseNote').value;
+            
+            if (amount && !isNaN(amount) && amount > 0) {
+                addTransaction('expense', currentCategory, Number(amount), note, currentPhoto);
+                closeExpenseModal();
+                showMessage('✅ Расход сохранен');
+            }
+        }
+        
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').style.display = 'none';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseNote').value = '';
+            document.getElementById('photoPreview').innerHTML = '';
+            currentPhoto = null;
+        }
+        
+        function addTransaction(type, category, amount, note, photo) {
+            let transaction = {
+                id: Date.now(),
+                category: category,
+                amount: type === 'expense' ? -amount : amount,
+                note: note || '',
+                photo: photo || null,
+                date: new Date().toISOString()
+            };
+            
+            transactions.push(transaction);
+            saveData();
+            updateDisplay();
+        }
+        
+        function deleteTransaction(id) {
+            if (confirm('Удалить?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                updateDisplay();
+                showMessage('🗑️ Удалено');
+            }
+        }
+        
+        // ========== БЮДЖЕТ ==========
+        function setBudget() {
+            let limit = prompt('Лимит на месяц:', budgetLimit);
+            if (limit && !isNaN(limit) && limit > 0) {
+                budgetLimit = Number(limit);
+                localStorage.setItem('budgetLimit', budgetLimit);
+                updateDisplay();
+            }
+        }
+        
+        // ========== ЦЕЛИ ==========
+        function showGoalForm() {
+            document.getElementById('goalModal').style.display = 'flex';
+        }
+        
+        function saveGoal() {
+            let name = document.getElementById('goalName').value;
+            let amount = parseFloat(document.getElementById('goalAmount').value);
+            
+            if (name && amount > 0) {
+                // Проверяем, нет ли уже такой цели
+                if (!goals.some(g => g.name === name)) {
+                    goals.push({
+                        id: Date.now(),
+                        name: name,
+                        target: amount,
+                        saved: 0
+                    });
+                    saveData();
+                    updateDisplay();
+                    closeModal();
+                    showMessage('🎯 Цель добавлена');
+                } else {
+                    alert('Такая цель уже есть!');
+                }
+            }
+        }
+        
+        function addToGoal(id) {
+            let goal = goals.find(g => g.id === id);
+            let amount = prompt(`Добавить к "${goal.name}":`);
+            if (amount && !isNaN(amount) && amount > 0) {
+                goal.saved += Number(amount);
+                saveData();
+                updateDisplay();
+            }
+        }
+        
+        function deleteGoal(id) {
+            if (confirm('Удалить цель?')) {
+                goals = goals.filter(g => g.id !== id);
+                saveData();
+                updateDisplay();
+            }
+        }
+        
+        // ========== ФОТО ==========
+        function showPhoto(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('photoModal').style.display = 'flex';
+        }
+        
+        function closePhotoModal() {
+            document.getElementById('photoModal').style.display = 'none';
+        }
+        
+        // ========== ПОИСК ==========
+        function searchTransactions() {
+            let text = document.getElementById('searchInput').value.toLowerCase();
+            displayTransactions(text);
+        }
+        
+        // ========== ЭКСПОРТ ==========
+        function exportToExcel() {
+            let csv = 'Дата;Категория;Сумма;Комментарий\n';
+            transactions.forEach(t => {
+                let date = new Date(t.date).toLocaleString('ru-RU');
+                csv += `${date};${t.category};${t.amount};${t.note}\n`;
+            });
+            
+            let blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'moi_dengi.csv';
+            link.click();
+        }
+        
+        function exportToJSON() {
+            let data = { transactions, goals, budgetLimit };
+            let blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'backup.json';
+            link.click();
+        }
+        
+        // ========== ОБНОВЛЕНИЕ ==========
+        function updateDisplay() {
+            let balance = transactions.reduce((sum, t) => sum + t.amount, 0);
+            document.getElementById('balance').innerHTML = balance + ' ₽';
+            
+            let income = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+            let expense = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+            document.getElementById('totalIncome').innerHTML = income + ' ₽';
+            document.getElementById('totalExpense').innerHTML = expense + ' ₽';
+            document.getElementById('monthExpense').innerHTML = expense + ' ₽';
+            
+            let avg = expense > 0 ? Math.round(expense / transactions.filter(t => t.amount < 0).length) : 0;
+            document.getElementById('averageCheck').innerHTML = avg + ' ₽';
+            
+            document.getElementById('spentMonth').innerHTML = expense;
+            document.getElementById('budgetRemaining').innerHTML = budgetLimit - expense;
+            
+            let percent = Math.min((expense / budgetLimit) * 100, 100);
+            document.getElementById('budgetProgress').style.width = percent + '%';
+            
+            updateChart();
+            updateGoals();
+            displayTransactions();
+            
+            document.getElementById('historyToggle').innerHTML = historyCollapsed ? '▶' : '▼';
+            document.getElementById('historyContent').className = historyCollapsed ? 'section-content collapsed' : 'section-content';
+            document.getElementById('goalsToggle').innerHTML = goalsCollapsed ? '▶' : '▼';
+            document.getElementById('goalsContent').className = goalsCollapsed ? 'section-content collapsed' : 'section-content';
+        }
+        
+        function displayTransactions(searchText = '') {
+            let container = document.getElementById('transactionsList');
+            
+            let filtered = transactions;
+            if (searchText) {
+                filtered = transactions.filter(t => 
+                    t.category.toLowerCase().includes(searchText) || 
+                    t.note.toLowerCase().includes(searchText)
+                );
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">Нет операций</div>';
+                return;
+            }
+            
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = filtered.map(t => {
+                let sign = t.amount > 0 ? '+' : '';
+                let color = t.amount > 0 ? '#4caf50' : '#f44336';
+                let date = new Date(t.date).toLocaleString('ru-RU');
+                
+                return `
+                    <div class="transaction-item">
+                        <button class="delete-btn" onclick="deleteTransaction(${t.id})">✕</button>
+                        <div class="transaction-header">
+                            <span class="transaction-category">${t.category}</span>
+                            <span class="transaction-amount" style="color: ${color}">${sign}${t.amount} ₽</span>
+                        </div>
+                        <div class="transaction-date">${date}</div>
+                        ${t.note ? `<div class="transaction-note">📝 ${t.note}</div>` : ''}
+                        ${t.photo ? `<img src="${t.photo}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; margin-top: 10px;" onclick="showPhoto('${t.photo}')">` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateChart() {
+            let chart = document.getElementById('categoryChart');
+            let expenses = transactions.filter(t => t.amount < 0);
+            
+            let cats = {};
+            expenses.forEach(t => cats[t.category] = (cats[t.category] || 0) + Math.abs(t.amount));
+            
+            if (Object.keys(cats).length === 0) {
+                chart.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">Нет расходов</div>';
+                return;
+            }
+            
+            let total = Object.values(cats).reduce((a, b) => a + b, 0);
+            
+            chart.innerHTML = Object.entries(cats).map(([cat, amt]) => {
+                let percent = (amt / total * 100).toFixed(1);
+                return `
+                    <div class="chart-item">
+                        <div class="chart-label">${cat}</div>
+                        <div class="chart-bar"><div class="chart-fill" style="width: ${percent}%;">${percent}%</div></div>
+                        <div style="min-width: 70px; text-align: right;">${amt} ₽</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateGoals() {
+            let container = document.getElementById('goalsList');
+            
+            if (goals.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Нет целей</div>';
+                return;
+            }
+            
+            container.innerHTML = goals.map(g => {
+                let percent = (g.saved / g.target * 100).toFixed(1);
+                return `
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-name">🎯 ${g.name}</span>
+                            <span>${g.saved} ₽ / ${g.target} ₽</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%; background: #ff9800;"></div></div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>${percent}%</span>
+                            <span>Осталось: ${g.target - g.saved} ₽</span>
+                        </div>
+                        <div class="goal-actions">
+                            <button onclick="addToGoal(${g.id})" style="flex:1; background:#4caf50; color:white;">➕ Добавить</button>
+                            <button onclick="deleteGoal(${g.id})" style="flex:1; background:#f44336; color:white;">✕ Удалить</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function closeModal() {
+            document.getElementById('goalModal').style.display = 'none';
+            document.getElementById('goalName').value = '';
+            document.getElementById('goalAmount').value = '';
+        }
+        
+        function saveData() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('goals', JSON.stringify(goals));
+        }
+        
+        function showMessage(text) {
+            let toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = text;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Запуск
+        loadCategories();
+        updateDisplay();
+    </script>
+</body>
+</html>
