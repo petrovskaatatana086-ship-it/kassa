@@ -59,34 +59,55 @@
             color: #2196f3;
         }
         
-        /* Статистика месяца */
-        .month-stats {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 15px 0;
-            text-align: center;
+        /* Стили для статистики по месяцам с навигацией */
+        .monthly-stats {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
         }
-        .month-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 15px;
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
-        .month-stat-item {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 10px;
+        .stats-nav {
+            display: flex;
+            gap: 10px;
         }
-        .month-stat-label {
-            font-size: 12px;
-            opacity: 0.9;
+        .stats-nav button {
+            padding: 5px 12px;
+            font-size: 14px;
+            background: white;
+            border: 1px solid #ddd;
         }
-        .month-stat-value {
-            font-size: 20px;
+        .monthly-stats table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .monthly-stats th {
+            text-align: left;
+            padding: 8px;
+            color: #666;
+            font-weight: normal;
+            font-size: 14px;
+        }
+        .monthly-stats td {
+            padding: 8px;
+            border-top: 1px solid #ddd;
+        }
+        .monthly-stats .income {
+            color: #4caf50;
             font-weight: bold;
-            margin-top: 5px;
+        }
+        .monthly-stats .expense {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .monthly-stats .balance {
+            color: #2196f3;
+            font-weight: bold;
         }
         
         .transactions-list { max-height: 400px; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 12px; }
@@ -112,6 +133,17 @@
         .photo-upload input { display: none; }
         .photo-upload label { background: #e0e0e0; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: inline-block; }
         .photo-preview { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 10px; }
+        
+        /* Стили для поля даты */
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 20px; width: 500px; max-width: 90%; }
         .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
@@ -171,26 +203,6 @@
                     <span class="current-month" id="currentMonthDisplay"></span>
                     <button class="month-btn" onclick="changeMonth(1)">След ▶</button>
                 </div>
-                
-                <!-- Статистика за выбранный месяц -->
-                <div class="month-stats" id="monthStats">
-                    <div style="font-size: 18px; margin-bottom: 10px;">📊 Статистика месяца</div>
-                    <div class="month-stats-grid">
-                        <div class="month-stat-item">
-                            <div class="month-stat-label">Доходы</div>
-                            <div class="month-stat-value" id="monthIncome">0 ₽</div>
-                        </div>
-                        <div class="month-stat-item">
-                            <div class="month-stat-label">Расходы</div>
-                            <div class="month-stat-value" id="monthExpense">0 ₽</div>
-                        </div>
-                        <div class="month-stat-item">
-                            <div class="month-stat-label">Разница</div>
-                            <div class="month-stat-value" id="monthDifference">0 ₽</div>
-                        </div>
-                    </div>
-                </div>
-                
                 <input type="text" class="search-box" id="searchInput" placeholder="🔍 Поиск по операциям..." onkeyup="searchTransactions()">
                 <div class="transactions-list" id="transactionsList"></div>
             </div>
@@ -198,7 +210,32 @@
         
         <!-- Правая панель -->
         <div class="panel">
-            <h2>📊 Общая статистика</h2>
+            <h2>📊 Статистика</h2>
+            
+            <!-- Статистика по месяцам с навигацией -->
+            <div class="monthly-stats">
+                <div class="stats-header">
+                    <h3>📅 Статистика</h3>
+                    <div class="stats-nav">
+                        <button onclick="changeStatsMonth(-1)">◀</button>
+                        <span id="statsMonthDisplay">Март 2024</span>
+                        <button onclick="changeStatsMonth(1)">▶</button>
+                    </div>
+                </div>
+                <table id="monthlyStats">
+                    <thead>
+                        <tr>
+                            <th>Неделя</th>
+                            <th>Доход</th>
+                            <th>Расход</th>
+                            <th>Баланс</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyStatsBody">
+                        <!-- Заполняется скриптом -->
+                    </tbody>
+                </table>
+            </div>
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -211,7 +248,7 @@
                 </div>
                 <div class="stat-card">
                     <div>📅 За этот месяц</div>
-                    <div class="stat-value" id="currentMonthExpense">0 ₽</div>
+                    <div class="stat-value" id="monthExpense">0 ₽</div>
                 </div>
                 <div class="stat-card">
                     <div>⭐ Средний чек</div>
@@ -260,6 +297,7 @@
             <div id="expenseCategoryDisplay" style="font-size: 18px; margin-bottom: 15px;"></div>
             <input type="number" id="expenseAmount" placeholder="Сумма">
             <input type="text" id="expenseNote" placeholder="Комментарий">
+            <input type="date" id="expenseDate" class="date-input">
             <div class="photo-upload">
                 <label for="receiptPhoto">📸 Загрузить фото чека</label>
                 <input type="file" id="receiptPhoto" accept="image/*" capture="environment" onchange="previewPhoto(event)">
@@ -268,6 +306,19 @@
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button onclick="saveExpenseWithPhoto()" style="flex: 1; background: #4caf50; color: white;">Сохранить</button>
                 <button onclick="closeExpenseModal()" style="flex: 1;">Отмена</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="incomeModal" class="modal" style="display: none;" onclick="if(event.target===this) closeIncomeModal()">
+        <div class="modal-content">
+            <h2>💰 Добавить доход</h2>
+            <input type="number" id="incomeAmount" placeholder="Сумма">
+            <input type="text" id="incomeNote" placeholder="Комментарий">
+            <input type="date" id="incomeDate" class="date-input">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="saveIncome()" style="flex: 1; background: #4caf50; color: white;">Сохранить</button>
+                <button onclick="closeIncomeModal()" style="flex: 1;">Отмена</button>
             </div>
         </div>
     </div>
@@ -296,9 +347,12 @@
         let historyCollapsed = localStorage.getItem('historyCollapsed') === 'true';
         let goalsCollapsed = localStorage.getItem('goalsCollapsed') === 'true';
         
-        // Текущий месяц для отображения
+        // Текущий месяц для отображения истории
         let currentMonth = new Date();
         let selectedMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        
+        // Текущий месяц для статистики
+        let statsMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
         
         // Категории на русском
         const categories = [
@@ -347,11 +401,10 @@
             document.getElementById('goalsContent').className = goalsCollapsed ? 'section-content collapsed' : 'section-content';
         }
         
-        // ========== ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ ==========
+        // ========== ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ ДЛЯ ИСТОРИИ ==========
         function changeMonth(delta) {
             selectedMonth.setMonth(selectedMonth.getMonth() + delta);
             updateMonthDisplay();
-            updateMonthStats();
             displayTransactions();
         }
         
@@ -362,37 +415,18 @@
             document.getElementById('currentMonthDisplay').textContent = displayText;
         }
         
-        // ========== СТАТИСТИКА ЗА МЕСЯЦ ==========
-        function updateMonthStats() {
-            const monthTransactions = transactions.filter(t => {
-                const transactionDate = new Date(t.date);
-                return transactionDate.getMonth() === selectedMonth.getMonth() &&
-                       transactionDate.getFullYear() === selectedMonth.getFullYear();
-            });
-            
-            const monthIncome = monthTransactions
-                .filter(t => t.amount > 0)
-                .reduce((sum, t) => sum + t.amount, 0);
-            
-            const monthExpense = monthTransactions
-                .filter(t => t.amount < 0)
-                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-            
-            const difference = monthIncome - monthExpense;
-            
-            document.getElementById('monthIncome').innerHTML = monthIncome + ' ₽';
-            document.getElementById('monthExpense').innerHTML = monthExpense + ' ₽';
-            document.getElementById('monthDifference').innerHTML = difference + ' ₽';
-            
-            // Меняем цвет разницы
-            const diffElement = document.getElementById('monthDifference');
-            if (difference > 0) {
-                diffElement.style.color = '#4caf50';
-            } else if (difference < 0) {
-                diffElement.style.color = '#f44336';
-            } else {
-                diffElement.style.color = 'white';
-            }
+        // ========== ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ ДЛЯ СТАТИСТИКИ ==========
+        function changeStatsMonth(delta) {
+            statsMonth.setMonth(statsMonth.getMonth() + delta);
+            updateStatsMonthDisplay();
+            updateMonthlyStats();
+        }
+        
+        function updateStatsMonthDisplay() {
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            const displayText = `${monthNames[statsMonth.getMonth()]} ${statsMonth.getFullYear()}`;
+            document.getElementById('statsMonthDisplay').textContent = displayText;
         }
         
         // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
@@ -401,16 +435,45 @@
         }
         
         function showIncomeForm() {
-            let amount = prompt('💰 Введите сумму дохода:');
+            // Устанавливаем сегодняшнюю дату по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('incomeDate').value = today;
+            document.getElementById('incomeModal').style.display = 'flex';
+        }
+        
+        function saveIncome() {
+            let amount = document.getElementById('incomeAmount').value;
+            let note = document.getElementById('incomeNote').value;
+            let date = document.getElementById('incomeDate').value;
+            
             if (amount && !isNaN(amount) && amount > 0) {
-                let note = prompt('Комментарий:');
-                addTransaction('income', '💰 Доход', Number(amount), note || '');
+                // Если дата не выбрана, используем сегодня
+                if (!date) {
+                    date = new Date().toISOString().split('T')[0];
+                }
+                
+                addTransaction('income', '💰 Доход', Number(amount), note || '', null, date);
+                closeIncomeModal();
+                showMessage('✅ Доход сохранен');
+            } else {
+                alert('Введите сумму!');
             }
+        }
+        
+        function closeIncomeModal() {
+            document.getElementById('incomeModal').style.display = 'none';
+            document.getElementById('incomeAmount').value = '';
+            document.getElementById('incomeNote').value = '';
         }
         
         function selectCategory(category) {
             currentCategory = category;
             document.getElementById('expenseCategoryDisplay').innerHTML = `Категория: ${category}`;
+            
+            // Устанавливаем сегодняшнюю дату по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expenseDate').value = today;
+            
             document.getElementById('expenseModal').style.display = 'flex';
             document.getElementById('categoryBlock').style.display = 'none';
         }
@@ -431,11 +494,19 @@
         function saveExpenseWithPhoto() {
             let amount = document.getElementById('expenseAmount').value;
             let note = document.getElementById('expenseNote').value;
+            let date = document.getElementById('expenseDate').value;
             
             if (amount && !isNaN(amount) && amount > 0) {
-                addTransaction('expense', currentCategory, Number(amount), note, currentPhoto);
+                // Если дата не выбрана, используем сегодня
+                if (!date) {
+                    date = new Date().toISOString().split('T')[0];
+                }
+                
+                addTransaction('expense', currentCategory, Number(amount), note, currentPhoto, date);
                 closeExpenseModal();
                 showMessage('✅ Расход сохранен');
+            } else {
+                alert('Введите сумму!');
             }
         }
         
@@ -443,23 +514,26 @@
             document.getElementById('expenseModal').style.display = 'none';
             document.getElementById('expenseAmount').value = '';
             document.getElementById('expenseNote').value = '';
+            document.getElementById('expenseDate').value = '';
             document.getElementById('photoPreview').innerHTML = '';
             currentPhoto = null;
         }
         
-        function addTransaction(type, category, amount, note, photo) {
+        function addTransaction(type, category, amount, note, photo, customDate = null) {
+            let transactionDate = customDate ? new Date(customDate) : new Date();
+            
             let transaction = {
                 id: Date.now(),
                 category: category,
                 amount: type === 'expense' ? -amount : amount,
                 note: note || '',
                 photo: photo || null,
-                date: new Date().toISOString()
+                date: transactionDate.toISOString()
             };
             
             transactions.push(transaction);
             saveData();
-            cleanupOldTransactions();
+            cleanupOldTransactions(); // Очищаем старые записи
             updateDisplay();
         }
         
@@ -572,43 +646,28 @@
             let balance = transactions.reduce((sum, t) => sum + t.amount, 0);
             document.getElementById('balance').innerHTML = balance + ' ₽';
             
-            let totalIncome = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-            let totalExpense = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            let income = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+            let expense = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
             
-            document.getElementById('totalIncome').innerHTML = totalIncome + ' ₽';
-            document.getElementById('totalExpense').innerHTML = totalExpense + ' ₽';
+            document.getElementById('totalIncome').innerHTML = income + ' ₽';
+            document.getElementById('totalExpense').innerHTML = expense + ' ₽';
+            document.getElementById('monthExpense').innerHTML = expense + ' ₽';
             
-            // Расходы за текущий месяц (для правой панели)
-            const currentDate = new Date();
-            const currentMonthTransactions = transactions.filter(t => {
-                const transactionDate = new Date(t.date);
-                return transactionDate.getMonth() === currentDate.getMonth() &&
-                       transactionDate.getFullYear() === currentDate.getFullYear();
-            });
-            
-            const currentMonthExpense = currentMonthTransactions
-                .filter(t => t.amount < 0)
-                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-            
-            document.getElementById('currentMonthExpense').innerHTML = currentMonthExpense + ' ₽';
-            
-            // Средний чек
-            let expenseCount = transactions.filter(t => t.amount < 0).length;
-            let avg = expenseCount > 0 ? Math.round(totalExpense / expenseCount) : 0;
+            let avg = expense > 0 ? Math.round(expense / transactions.filter(t => t.amount < 0).length) : 0;
             document.getElementById('averageCheck').innerHTML = avg + ' ₽';
             
-            // Бюджет
-            document.getElementById('spentMonth').innerHTML = currentMonthExpense;
-            document.getElementById('budgetRemaining').innerHTML = budgetLimit - currentMonthExpense;
+            document.getElementById('spentMonth').innerHTML = expense;
+            document.getElementById('budgetRemaining').innerHTML = budgetLimit - expense;
             
-            let percent = Math.min((currentMonthExpense / budgetLimit) * 100, 100);
+            let percent = Math.min((expense / budgetLimit) * 100, 100);
             document.getElementById('budgetProgress').style.width = percent + '%';
             
             updateChart();
             updateGoals();
-            updateMonthStats();
+            updateMonthlyStats();
             displayTransactions();
             updateMonthDisplay();
+            updateStatsMonthDisplay();
             
             document.getElementById('historyToggle').innerHTML = historyCollapsed ? '▶' : '▼';
             document.getElementById('historyContent').className = historyCollapsed ? 'section-content collapsed' : 'section-content';
@@ -658,6 +717,60 @@
                     </div>
                 `;
             }).join('');
+        }
+        
+        function updateMonthlyStats() {
+            // Фильтруем транзакции за выбранный месяц статистики
+            const monthTransactions = transactions.filter(t => {
+                const date = new Date(t.date);
+                return date.getMonth() === statsMonth.getMonth() &&
+                       date.getFullYear() === statsMonth.getFullYear();
+            });
+            
+            // Группируем по неделям
+            const weeklyData = {};
+            
+            monthTransactions.forEach(t => {
+                const date = new Date(t.date);
+                const weekNumber = Math.floor(date.getDate() / 7) + 1;
+                const weekKey = `Неделя ${weekNumber}`;
+                
+                if (!weeklyData[weekKey]) {
+                    weeklyData[weekKey] = {
+                        income: 0,
+                        expense: 0
+                    };
+                }
+                
+                if (t.amount > 0) {
+                    weeklyData[weekKey].income += t.amount;
+                } else {
+                    weeklyData[weekKey].expense += Math.abs(t.amount);
+                }
+            });
+            
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                const weekKey = `Неделя ${i}`;
+                const data = weeklyData[weekKey] || { income: 0, expense: 0 };
+                const balance = data.income - data.expense;
+                const balanceClass = balance >= 0 ? 'income' : 'expense';
+                
+                html += `
+                    <tr>
+                        <td>Неделя ${i}</td>
+                        <td class="income">+${data.income} ₽</td>
+                        <td class="expense">-${data.expense} ₽</td>
+                        <td class="${balanceClass}">${balance} ₽</td>
+                    </tr>
+                `;
+            }
+            
+            if (monthTransactions.length === 0) {
+                html = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Нет данных за этот месяц</td></tr>';
+            }
+            
+            document.getElementById('monthlyStatsBody').innerHTML = html;
         }
         
         function updateChart() {
@@ -735,7 +848,7 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        // Запуск
+        // Запуск с очисткой старых данных
         loadCategories();
         cleanupOldTransactions();
         updateDisplay();
