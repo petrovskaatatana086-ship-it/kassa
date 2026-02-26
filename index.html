@@ -3,218 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👶 Дневник здоровья детей</title>
+    <title>💰 Моя касса</title>
     <style>
+        /* Стили такие же, как в прошлой версии */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
-        body { background: #f0f7f0; padding: 20px; }
+        body { background: #f0f2f5; padding: 20px; }
         .app { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .panel { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #4caf50; margin-bottom: 20px; font-size: 28px; }
+        h1 { color: #2196f3; margin-bottom: 20px; font-size: 28px; }
         h2 { color: #333; margin: 0; font-size: 20px; }
-        
-        /* Переключатель детей */
-        .children-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .child-btn {
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 30px;
-            background: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .child-btn:hover {
-            background: #4caf50;
-            color: white;
-            border-color: #4caf50;
-        }
-        .child-btn.active {
-            background: #4caf50;
-            color: white;
-            border-color: #4caf50;
-        }
-        .add-child-btn {
-            background: #e8f5e9;
-            color: #4caf50;
-            border: 2px dashed #4caf50;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin: 15px 0;
-        }
+        .section-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 10px; margin: 15px 0; }
         .section-header h2 { margin: 0; }
         .section-content { transition: max-height 0.3s ease; overflow: hidden; }
         .section-content.collapsed { max-height: 0; }
+        .balance-card { background: linear-gradient(135deg, #2196f3, #1976d2); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 25px; }
+        .balance-amount { font-size: 48px; font-weight: bold; }
+        .buttons { display: flex; gap: 15px; margin-bottom: 25px; }
+        button { padding: 15px 25px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        button:hover { transform: scale(1.02); filter: brightness(0.95); }
+        .expense-btn { background: #ffebee; color: #f44336; flex: 1; font-size: 18px; }
+        .income-btn { background: #e8f5e9; color: #4caf50; flex: 1; font-size: 18px; }
+        .categories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 15px; }
+        .cat-btn { background: white; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; color: #333; }
+        .cat-btn:hover { background: #2196f3; color: white; border-color: #2196f3; }
+        .progress-section { background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 15px 0; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
+        .search-box { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 10px; margin: 15px 0; font-size: 16px; }
         
-        .stats-card {
-            background: linear-gradient(135deg, #4caf50, #45a049);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 5px;
-            word-break: break-word;
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        .action-btn {
-            padding: 12px 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-            min-width: 100px;
-            transition: transform 0.2s;
-        }
-        .action-btn:hover { transform: scale(1.02); }
-        .symptom-btn { background: #ffebee; color: #f44336; }
-        .diagnosis-btn { background: #e1f5fe; color: #0288d1; }
-        .prescription-btn { background: #fff3e0; color: #ff9800; }
-        .treatment-btn { background: #e8f5e9; color: #4caf50; }
-        .medicine-btn { background: #f3e5f5; color: #9c27b0; }
-        .doctor-btn { background: #e0f7fa; color: #0097a7; }
-        .vaccine-btn { background: #ffecb3; color: #ff6f00; }
-        .pharmacy-btn { background: #c8e6c9; color: #2e7d32; }
-        
-        .filter-section {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-        }
-        .filter-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .filter-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .filter-select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            min-width: 150px;
-        }
-        
-        /* Аптечка */
-        .pharmacy-section {
-            background: #fff8e1;
-            border-radius: 15px;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        .medicine-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ffe0b2;
-            gap: 10px;
-        }
-        .medicine-check {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        .medicine-info {
-            flex: 1;
-        }
-        .medicine-name {
-            font-weight: bold;
-        }
-        .medicine-expiry {
-            font-size: 12px;
-            color: #f44336;
-        }
-        .medicine-photo {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-            cursor: pointer;
-        }
-        .to-buy-list {
-            background: #fff3e0;
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 10px;
-        }
-        .to-buy-item {
-            display: flex;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px dashed #ffb74d;
-        }
-        
-        /* Календарь прививок */
-        .vaccine-calendar {
-            background: #e8f5e9;
-            border-radius: 15px;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        .vaccine-item {
-            padding: 10px;
-            border-left: 4px solid #4caf50;
-            background: white;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        .vaccine-date {
-            font-size: 12px;
-            color: #666;
-        }
-        .vaccine-status {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            margin-left: 10px;
-        }
-        .status-done { background: #c8e6c9; color: #2e7d32; }
-        .status-pending { background: #ffecb3; color: #ff6f00; }
-        .status-upcoming { background: #bbdefb; color: #1565c0; }
-        
+        /* Стили для переключателя месяцев */
         .month-selector {
             display: flex;
             justify-content: space-between;
@@ -229,875 +46,488 @@
             padding: 8px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
+            font-size: 14px;
             cursor: pointer;
         }
-        
-        .entries-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #f0f0f0;
-            border-radius: 12px;
+        .month-btn:hover {
+            background: #2196f3;
+            color: white;
         }
-        .entry-item {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            position: relative;
-            background: white;
-        }
-        .entry-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .entry-child {
+        .current-month {
             font-weight: bold;
-            color: #4caf50;
-        }
-        .entry-type {
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .type-symptom { background: #ffebee; color: #f44336; }
-        .type-diagnosis { background: #e1f5fe; color: #0288d1; }
-        .type-prescription { background: #fff3e0; color: #ff9800; }
-        .type-treatment { background: #e8f5e9; color: #4caf50; }
-        .type-medicine { background: #f3e5f5; color: #9c27b0; }
-        .type-doctor { background: #e0f7fa; color: #0097a7; }
-        .type-vaccine { background: #ffecb3; color: #ff6f00; }
-        
-        .entry-title {
             font-size: 16px;
+            color: #2196f3;
+        }
+        
+        /* Статистика месяца */
+        .month-stats {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .month-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .month-stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .month-stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .month-stat-value {
+            font-size: 20px;
             font-weight: bold;
-            margin: 5px 0;
-        }
-        .entry-details {
-            font-size: 14px;
-            color: #666;
-            margin: 5px 0;
-        }
-        .entry-tags {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            margin: 5px 0;
-        }
-        .tag {
-            background: #f0f0f0;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-        .entry-date {
-            font-size: 12px;
-            color: #999;
             margin-top: 5px;
         }
-        .delete-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #f44336;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-        }
-        .entry-photo {
-            margin: 10px 0;
-            max-width: 200px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
         
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 500px;
-            max-width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-content input,
-        .modal-content select,
-        .modal-content textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        .tags-input {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin: 10px 0;
-        }
-        .tag-option {
-            background: #f0f0f0;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .tag-option.selected {
-            background: #4caf50;
-            color: white;
-        }
-        .custom-tag-input {
-            display: flex;
-            gap: 5px;
-            margin: 10px 0;
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            animation: slideUp 0.3s;
-            z-index: 1000;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @media (max-width: 768px) {
-            .app { grid-template-columns: 1fr; }
-        }
+        .transactions-list { max-height: 400px; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 12px; }
+        .transaction-item { padding: 15px; border-bottom: 1px solid #f0f0f0; background: white; position: relative; }
+        .transaction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .transaction-category { font-size: 16px; font-weight: bold; }
+        .transaction-amount { font-weight: bold; font-size: 18px; }
+        .transaction-date { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .transaction-note { font-size: 14px; color: #666; margin: 5px 0; }
+        .delete-btn { background: #f44336; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 16px; position: absolute; top: 10px; right: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #2196f3; margin-top: 5px; }
+        .chart-item { display: flex; align-items: center; margin: 10px 0; }
+        .chart-label { width: 100px; font-size: 14px; }
+        .chart-bar { flex: 1; height: 24px; background: #e0e0e0; border-radius: 12px; margin: 0 10px; overflow: hidden; }
+        .chart-fill { height: 100%; background: #2196f3; border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 12px; }
+        .goal-item { background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 10px 0; }
+        .goal-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .goal-name { font-weight: bold; font-size: 16px; }
+        .goal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .photo-upload { margin: 10px 0; }
+        .photo-upload input { display: none; }
+        .photo-upload label { background: #e0e0e0; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: inline-block; }
+        .photo-preview { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 10px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 500px; max-width: 90%; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 15px 25px; border-radius: 10px; animation: slideUp 0.3s; z-index: 1000; }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @media (max-width: 768px) { .app { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="app">
-        <!-- Левая панель - Основное -->
+        <!-- Левая панель -->
         <div class="panel">
-            <h1>👶 Дневник здоровья</h1>
+            <h1>💰 Моя касса</h1>
             
-            <!-- Выбор ребенка -->
-            <div class="children-selector" id="childrenSelector"></div>
+            <!-- Баланс -->
+            <div class="balance-card">
+                <div class="balance-amount" id="balance">0 ₽</div>
+            </div>
             
-            <!-- Статистика по ребенку -->
-            <div class="stats-card" id="childStats">
-                <div class="stat-item">
-                    <div class="stat-label">Последняя болезнь</div>
-                    <div class="stat-value" id="lastIllness">Нет</div>
+            <!-- Кнопки -->
+            <div class="buttons">
+                <button class="expense-btn" onclick="showExpenseForm()">➖ РАСХОД</button>
+                <button class="income-btn" onclick="showIncomeForm()">➕ ДОХОД</button>
+            </div>
+            
+            <!-- Категории -->
+            <div id="categoryBlock" style="display: none;">
+                <h2 style="margin-bottom: 15px;">Выберите категорию расхода:</h2>
+                <div class="categories" id="categories"></div>
+            </div>
+            
+            <!-- Бюджет -->
+            <div class="progress-section">
+                <h2>📊 Бюджет на месяц</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Потрачено: <span id="spentMonth">0</span> ₽</span>
+                    <span>Лимит: <span id="budgetLimit">30000</span> ₽</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-label">Последняя температура</div>
-                    <div class="stat-value" id="lastTemp">36.6°C</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="budgetProgress" style="width: 0%;"></div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-label">Активный диагноз</div>
-                    <div class="stat-value" id="activeDiagnosis">Нет</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Следующая прививка</div>
-                    <div class="stat-value" id="nextVaccine">Нет</div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Осталось: <span id="budgetRemaining">30000</span> ₽</span>
+                    <button onclick="setBudget()">Установить лимит</button>
                 </div>
             </div>
             
-            <!-- Быстрые действия -->
-            <div class="quick-actions">
-                <button class="action-btn symptom-btn" onclick="showEntryForm('symptom')">🤒 Симптом</button>
-                <button class="action-btn diagnosis-btn" onclick="showEntryForm('diagnosis')">🔬 Диагноз</button>
-                <button class="action-btn prescription-btn" onclick="showEntryForm('prescription')">📋 Назначение</button>
-                <button class="action-btn treatment-btn" onclick="showEntryForm('treatment')">🏥 Лечение</button>
-                <button class="action-btn medicine-btn" onclick="showEntryForm('medicine')">💊 Лекарство</button>
-                <button class="action-btn doctor-btn" onclick="showEntryForm('doctor')">👨‍⚕️ Врач</button>
-                <button class="action-btn vaccine-btn" onclick="showEntryForm('vaccine')">💉 Прививка</button>
-                <button class="action-btn pharmacy-btn" onclick="showPharmacyForm()">💊 В аптечку</button>
+            <!-- История операций с переключателем месяцев -->
+            <div class="section-header" onclick="toggleHistory()">
+                <h2>📋 История операций</h2>
+                <span id="historyToggle">▼</span>
             </div>
-            
-            <!-- Аптечка -->
-            <div class="pharmacy-section">
-                <h2 style="margin-bottom: 15px;">💊 Аптечка</h2>
-                <div id="pharmacyList"></div>
-                <div class="to-buy-list">
-                    <h3 style="font-size: 16px; margin-bottom: 10px;">🛒 Что купить</h3>
-                    <div id="shoppingList"></div>
+            <div id="historyContent" class="section-content">
+                <!-- Переключатель месяцев -->
+                <div class="month-selector">
+                    <button class="month-btn" onclick="changeMonth(-1)">◀ Пред</button>
+                    <span class="current-month" id="currentMonthDisplay"></span>
+                    <button class="month-btn" onclick="changeMonth(1)">След ▶</button>
                 </div>
-            </div>
-            
-            <!-- Календарь прививок -->
-            <div class="vaccine-calendar">
-                <h2 style="margin-bottom: 15px;">💉 Календарь прививок</h2>
-                <div id="vaccineCalendar"></div>
-            </div>
-            
-            <!-- Фильтры -->
-            <div class="filter-section">
-                <div class="filter-row">
-                    <input type="text" class="filter-input" id="searchInput" placeholder="🔍 Поиск по записям..." onkeyup="applyFilters()">
-                    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
-                        <option value="all">Все типы</option>
-                        <option value="symptom">🤒 Симптомы</option>
-                        <option value="diagnosis">🔬 Диагнозы</option>
-                        <option value="prescription">📋 Назначения</option>
-                        <option value="treatment">🏥 Лечение</option>
-                        <option value="medicine">💊 Лекарства</option>
-                        <option value="doctor">👨‍⚕️ Врач</option>
-                        <option value="vaccine">💉 Прививки</option>
-                    </select>
+                
+                <!-- Статистика за выбранный месяц -->
+                <div class="month-stats" id="monthStats">
+                    <div style="font-size: 18px; margin-bottom: 10px;">📊 Статистика месяца</div>
+                    <div class="month-stats-grid">
+                        <div class="month-stat-item">
+                            <div class="month-stat-label">Доходы</div>
+                            <div class="month-stat-value" id="monthIncome">0 ₽</div>
+                        </div>
+                        <div class="month-stat-item">
+                            <div class="month-stat-label">Расходы</div>
+                            <div class="month-stat-value" id="monthExpense">0 ₽</div>
+                        </div>
+                        <div class="month-stat-item">
+                            <div class="month-stat-label">Разница</div>
+                            <div class="month-stat-value" id="monthDifference">0 ₽</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="filter-row">
-                    <select class="filter-select" id="childFilter" onchange="applyFilters()">
-                        <option value="all">Все дети</option>
-                    </select>
-                </div>
+                
+                <input type="text" class="search-box" id="searchInput" placeholder="🔍 Поиск по операциям..." onkeyup="searchTransactions()">
+                <div class="transactions-list" id="transactionsList"></div>
             </div>
-            
-            <!-- Переключатель месяцев -->
-            <div class="month-selector">
-                <button class="month-btn" onclick="changeMonth(-1)">◀ Пред</button>
-                <span class="current-month" id="currentMonthDisplay"></span>
-                <button class="month-btn" onclick="changeMonth(1)">След ▶</button>
-            </div>
-            
-            <!-- Список записей -->
-            <div class="entries-list" id="entriesList"></div>
         </div>
         
-        <!-- Правая панель - Аналитика -->
+        <!-- Правая панель -->
         <div class="panel">
-            <h2>🔬 История диагнозов</h2>
-            <div id="diagnosisHistory"></div>
+            <h2>📊 Общая статистика</h2>
             
-            <h2>📋 Активные назначения</h2>
-            <div id="activePrescriptionsList"></div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div>💰 Всего доходов</div>
+                    <div class="stat-value" id="totalIncome">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div>💸 Всего расходов</div>
+                    <div class="stat-value" id="totalExpense">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div>📅 За этот месяц</div>
+                    <div class="stat-value" id="currentMonthExpense">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div>⭐ Средний чек</div>
+                    <div class="stat-value" id="averageCheck">0 ₽</div>
+                </div>
+            </div>
             
-            <h2>💉 Следующие прививки</h2>
-            <div id="upcomingVaccines"></div>
+            <!-- График категорий -->
+            <h2>📈 Расходы по категориям</h2>
+            <div id="categoryChart"></div>
+            
+            <!-- Цели -->
+            <div class="section-header" onclick="toggleGoals()">
+                <h2>🎯 Мои цели</h2>
+                <span id="goalsToggle">▼</span>
+            </div>
+            <div id="goalsContent" class="section-content">
+                <div id="goalsList"></div>
+                <button onclick="showGoalForm()" style="width: 100%; margin: 10px 0;">➕ Добавить цель</button>
+            </div>
             
             <!-- Экспорт -->
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="exportToCSV()" style="flex: 1; background: #4caf50; color: white; padding: 15px;">📥 Скачать CSV</button>
-                <button onclick="exportToJSON()" style="flex: 1; background: #ff9800; color: white; padding: 15px;">💾 Бэкап</button>
+                <button onclick="exportToExcel()" style="flex: 1; background: #4caf50; color: white;">📥 Скачать Excel</button>
+                <button onclick="exportToJSON()" style="flex: 1; background: #ff9800; color: white;">💾 Сохранить бэкап</button>
             </div>
         </div>
     </div>
     
-    <!-- Модальное окно для ребенка -->
-    <div id="childModal" class="modal" style="display: none;" onclick="if(event.target===this) closeChildModal()">
+    <!-- Модальные окна -->
+    <div id="goalModal" class="modal" style="display: none;" onclick="if(event.target===this) closeModal()">
         <div class="modal-content">
-            <h2>👶 Добавить ребенка</h2>
-            <input type="text" id="childName" placeholder="Имя ребенка">
-            <input type="number" id="childAge" placeholder="Возраст (лет)">
+            <h2>🎯 Новая цель</h2>
+            <input type="text" id="goalName" placeholder="Название цели">
+            <input type="number" id="goalAmount" placeholder="Сумма">
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="saveChild()" style="flex: 1; background: #4caf50; color: white;">Сохранить</button>
-                <button onclick="closeChildModal()" style="flex: 1;">Отмена</button>
+                <button onclick="saveGoal()" style="flex: 1; background: #2196f3; color: white;">Сохранить</button>
+                <button onclick="closeModal()" style="flex: 1;">Отмена</button>
             </div>
         </div>
     </div>
     
-    <!-- Модальное окно для записи -->
-    <div id="entryModal" class="modal" style="display: none;" onclick="if(event.target===this) closeEntryModal()">
+    <div id="expenseModal" class="modal" style="display: none;" onclick="if(event.target===this) closeExpenseModal()">
         <div class="modal-content">
-            <h2 id="modalTitle">Добавить запись</h2>
-            
-            <select id="entryChild" required>
-                <option value="">Выберите ребенка</option>
-            </select>
-            
-            <input type="text" id="entryTitle" placeholder="Название">
-            
-            <textarea id="entryDescription" placeholder="Описание" rows="3"></textarea>
-            
-            <div class="tags-input" id="tagsContainer"></div>
-            
-            <!-- Поле для своего тега -->
-            <div class="custom-tag-input">
-                <input type="text" id="customTag" placeholder="Свой вариант" style="flex: 1;">
-                <button onclick="addCustomTag()" style="padding: 10px;">➕</button>
+            <h2>📸 Добавить расход</h2>
+            <div id="expenseCategoryDisplay" style="font-size: 18px; margin-bottom: 15px;"></div>
+            <input type="number" id="expenseAmount" placeholder="Сумма">
+            <input type="text" id="expenseNote" placeholder="Комментарий">
+            <div class="photo-upload">
+                <label for="receiptPhoto">📸 Загрузить фото чека</label>
+                <input type="file" id="receiptPhoto" accept="image/*" capture="environment" onchange="previewPhoto(event)">
             </div>
-            
-            <input type="number" id="entryTemperature" placeholder="Температура (°C)" step="0.1">
-            
-            <input type="text" id="entryMedicine" placeholder="Лекарства">
-            
-            <input type="datetime-local" id="entryDateTime">
-            
-            <!-- Для прививок -->
-            <div id="vaccineFields" style="display: none;">
-                <input type="date" id="vaccineNextDate" placeholder="Дата следующей">
-                <select id="vaccineStatus">
-                    <option value="done">Сделано</option>
-                    <option value="pending">Запланировано</option>
-                </select>
-            </div>
-            
-            <!-- Для аптечки -->
-            <div id="pharmacyFields" style="display: none;">
-                <input type="date" id="medicineExpiry" placeholder="Срок годности">
-                <label>
-                    <input type="checkbox" id="needToBuy"> Нужно купить
-                </label>
-            </div>
-            
-            <div class="photo-upload" style="margin: 10px 0;">
-                <label for="entryPhoto" style="background: #e0e0e0; padding: 10px; border-radius: 8px; cursor: pointer;">📸 Фото</label>
-                <input type="file" id="entryPhoto" accept="image/*" capture="environment" onchange="previewEntryPhoto(event)" style="display: none;">
-            </div>
-            <div id="entryPhotoPreview"></div>
-            
+            <div id="photoPreview"></div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="saveEntry()" style="flex: 1; background: #4caf50; color: white;">Сохранить</button>
-                <button onclick="closeEntryModal()" style="flex: 1;">Отмена</button>
+                <button onclick="saveExpenseWithPhoto()" style="flex: 1; background: #4caf50; color: white;">Сохранить</button>
+                <button onclick="closeExpenseModal()" style="flex: 1;">Отмена</button>
             </div>
         </div>
     </div>
     
-    <!-- Модальное окно для фото -->
     <div id="photoModal" class="modal" style="display: none;" onclick="closePhotoModal()">
-        <img id="modalImage" src="" style="max-width: 90%; max-height: 90%;">
+        <img id="modalImage" src="">
     </div>
 
     <script>
+        // ========== ОЧИСТКА СТАРЫХ ДАННЫХ ==========
+        let oldData = localStorage.getItem('transactions');
+        if (oldData) {
+            let oldTransactions = JSON.parse(oldData);
+            if (oldTransactions.some(t => ['income', 'education', 'bills'].includes(t.category))) {
+                localStorage.clear();
+                console.log('Очищены старые данные');
+            }
+        }
+        
         // ========== ДАННЫЕ ==========
-        let children = JSON.parse(localStorage.getItem('health_children')) || [];
-        let entries = JSON.parse(localStorage.getItem('health_entries')) || [];
-        let pharmacy = JSON.parse(localStorage.getItem('pharmacy')) || [];
-        let selectedChild = null;
-        let currentEntryType = 'symptom';
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let goals = JSON.parse(localStorage.getItem('goals')) || [];
+        let budgetLimit = parseFloat(localStorage.getItem('budgetLimit')) || 30000;
+        
+        // Состояние сворачивания
+        let historyCollapsed = localStorage.getItem('historyCollapsed') === 'true';
+        let goalsCollapsed = localStorage.getItem('goalsCollapsed') === 'true';
+        
+        // Текущий месяц для отображения
         let currentMonth = new Date();
         let selectedMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        
+        // Категории на русском
+        const categories = [
+            '🍔 Еда', '🚗 Транспорт', '🎮 Развлечения',
+            '🛍️ Покупки', '📄 Счета', '🏥 Здоровье',
+            '📚 Образование', '📺 Подписки', '📦 Другое'
+        ];
+        
+        let currentCategory = '';
         let currentPhoto = null;
         
-        // Теги (добавил "Другое")
-        const symptomTags = ['🤒 Температура', '🤧 Насморк', '🤮 Тошнота', '😴 Слабость', '🤕 Головная боль', '🦠 Кашель', '😷 Горло', 'Другое'];
-        const diagnosisTags = ['🔬 ОРВИ', '🔬 Ангина', '🔬 Бронхит', '🔬 Отит', '🔬 Аллергия', '🔬 Ветрянка', '🔬 Грипп', 'Другое'];
-        const prescriptionTags = ['📋 Антибиотики', '📋 Противовирусные', '📋 Жаропонижающие', '📋 От кашля', '📋 От насморка', '📋 Витамины', 'Другое'];
-        const treatmentTags = ['🏥 Ингаляции', '🏥 Прогревания', '🏥 Массаж', '🏥 Гимнастика', '🏥 Физиотерапия', 'Другое'];
-        const medicineTags = ['💊 Таблетки', '🧪 Сироп', '💧 Капли', '🩹 Мазь', '💉 Уколы', '🌿 Травы', 'Другое'];
-        const doctorTags = ['👨‍⚕️ Педиатр', '👨‍⚕️ ЛОР', '👨‍⚕️ Невролог', '👨‍⚕️ Аллерголог', '👨‍⚕️ Анализы', '🩺 Прививка', 'Другое'];
-        const vaccineTags = ['💉 АКДС', '💉 Пентаксим', '💉 Гепатит B', '💉 Полиомиелит', '💉 Корь', '💉 Краснуха', '💉 Паротит', 'Другое'];
+        // ========== ФУНКЦИЯ ОЧИСТКИ СТАРЫХ ТРАНЗАКЦИЙ ==========
+        function cleanupOldTransactions() {
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const oldCount = transactions.length;
+            transactions = transactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+            
+            if (oldCount !== transactions.length) {
+                saveData();
+                console.log(`Удалено ${oldCount - transactions.length} старых записей`);
+                showMessage(`🗑️ Очищены записи старше 6 месяцев`);
+            }
+        }
         
         // ========== ЗАГРУЗКА ==========
-        function loadChildren() {
-            const container = document.getElementById('childrenSelector');
-            let html = '';
-            
-            children.forEach((child, index) => {
-                html += `<button class="child-btn ${selectedChild === index ? 'active' : ''}" onclick="selectChild(${index})">${child.name} (${child.age} лет)</button>`;
+        function loadCategories() {
+            document.getElementById('categories').innerHTML = categories.map(cat => 
+                `<button class="cat-btn" onclick="selectCategory('${cat}')">${cat}</button>`
+            ).join('');
+        }
+        
+        // ========== СВОРАЧИВАНИЕ ==========
+        function toggleHistory() {
+            historyCollapsed = !historyCollapsed;
+            localStorage.setItem('historyCollapsed', historyCollapsed);
+            document.getElementById('historyToggle').innerHTML = historyCollapsed ? '▶' : '▼';
+            document.getElementById('historyContent').className = historyCollapsed ? 'section-content collapsed' : 'section-content';
+        }
+        
+        function toggleGoals() {
+            goalsCollapsed = !goalsCollapsed;
+            localStorage.setItem('goalsCollapsed', goalsCollapsed);
+            document.getElementById('goalsToggle').innerHTML = goalsCollapsed ? '▶' : '▼';
+            document.getElementById('goalsContent').className = goalsCollapsed ? 'section-content collapsed' : 'section-content';
+        }
+        
+        // ========== ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ ==========
+        function changeMonth(delta) {
+            selectedMonth.setMonth(selectedMonth.getMonth() + delta);
+            updateMonthDisplay();
+            updateMonthStats();
+            displayTransactions();
+        }
+        
+        function updateMonthDisplay() {
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            const displayText = `${monthNames[selectedMonth.getMonth()]} ${selectedMonth.getFullYear()}`;
+            document.getElementById('currentMonthDisplay').textContent = displayText;
+        }
+        
+        // ========== СТАТИСТИКА ЗА МЕСЯЦ ==========
+        function updateMonthStats() {
+            const monthTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.getMonth() === selectedMonth.getMonth() &&
+                       transactionDate.getFullYear() === selectedMonth.getFullYear();
             });
             
-            html += `<button class="child-btn add-child-btn" onclick="showChildForm()">➕ Добавить</button>`;
+            const monthIncome = monthTransactions
+                .filter(t => t.amount > 0)
+                .reduce((sum, t) => sum + t.amount, 0);
             
-            container.innerHTML = html;
+            const monthExpense = monthTransactions
+                .filter(t => t.amount < 0)
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
             
-            const childFilter = document.getElementById('childFilter');
-            childFilter.innerHTML = '<option value="all">Все дети</option>' + 
-                children.map((c, i) => `<option value="${i}">${c.name}</option>`).join('');
-        }
-        
-        function selectChild(index) {
-            selectedChild = index;
-            loadChildren();
-            updateDisplay();
-        }
-        
-        // ========== АПТЕЧКА ==========
-        function showPharmacyForm() {
-            currentEntryType = 'pharmacy';
-            document.getElementById('modalTitle').innerHTML = '💊 Добавить в аптечку';
-            document.getElementById('pharmacyFields').style.display = 'block';
-            document.getElementById('vaccineFields').style.display = 'none';
-            document.getElementById('tagsContainer').innerHTML = '';
-            document.getElementById('entryModal').style.display = 'flex';
-        }
-        
-        function addToPharmacy(name, photo, expiry, needToBuy) {
-            pharmacy.push({
-                id: Date.now(),
-                name: name,
-                photo: photo,
-                expiry: expiry,
-                needToBuy: needToBuy,
-                bought: false
-            });
-            localStorage.setItem('pharmacy', JSON.stringify(pharmacy));
-            updatePharmacy();
-        }
-        
-        function toggleBought(id) {
-            const item = pharmacy.find(p => p.id === id);
-            if (item) {
-                item.bought = !item.bought;
-                localStorage.setItem('pharmacy', JSON.stringify(pharmacy));
-                updatePharmacy();
+            const difference = monthIncome - monthExpense;
+            
+            document.getElementById('monthIncome').innerHTML = monthIncome + ' ₽';
+            document.getElementById('monthExpense').innerHTML = monthExpense + ' ₽';
+            document.getElementById('monthDifference').innerHTML = difference + ' ₽';
+            
+            // Меняем цвет разницы
+            const diffElement = document.getElementById('monthDifference');
+            if (difference > 0) {
+                diffElement.style.color = '#4caf50';
+            } else if (difference < 0) {
+                diffElement.style.color = '#f44336';
+            } else {
+                diffElement.style.color = 'white';
             }
         }
         
-        function toggleNeedToBuy(id) {
-            const item = pharmacy.find(p => p.id === id);
-            if (item) {
-                item.needToBuy = !item.needToBuy;
-                localStorage.setItem('pharmacy', JSON.stringify(pharmacy));
-                updatePharmacy();
+        // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
+        function showExpenseForm() {
+            document.getElementById('categoryBlock').style.display = 'block';
+        }
+        
+        function showIncomeForm() {
+            let amount = prompt('💰 Введите сумму дохода:');
+            if (amount && !isNaN(amount) && amount > 0) {
+                let note = prompt('Комментарий:');
+                addTransaction('income', '💰 Доход', Number(amount), note || '');
             }
         }
         
-        function updatePharmacy() {
-            const container = document.getElementById('pharmacyList');
-            const shoppingContainer = document.getElementById('shoppingList');
-            
-            // Все лекарства
-            container.innerHTML = pharmacy.map(p => {
-                const expiryDate = p.expiry ? new Date(p.expiry) : null;
-                const isExpired = expiryDate && expiryDate < new Date();
-                
-                return `
-                    <div class="medicine-item">
-                        <input type="checkbox" class="medicine-check" ${p.bought ? 'checked' : ''} onchange="toggleBought(${p.id})">
-                        <div class="medicine-info">
-                            <div class="medicine-name" style="text-decoration: ${p.bought ? 'line-through' : 'none'}">${p.name}</div>
-                            ${p.expiry ? `<div class="medicine-expiry">Годен до: ${new Date(p.expiry).toLocaleDateString()} ${isExpired ? '❗ ПРОСРОЧЕНО' : ''}</div>` : ''}
-                        </div>
-                        ${p.photo ? `<img src="${p.photo}" class="medicine-photo" onclick="showPhoto('${p.photo}')">` : ''}
-                        <button onclick="toggleNeedToBuy(${p.id})" style="background: none; border: none; font-size: 18px;">${p.needToBuy ? '🛒' : '✅'}</button>
-                    </div>
-                `;
-            }).join('');
-            
-            // Список покупок
-            const toBuy = pharmacy.filter(p => p.needToBuy && !p.bought);
-            shoppingContainer.innerHTML = toBuy.map(p => 
-                `<div class="to-buy-item">
-                    <input type="checkbox" onchange="toggleBought(${p.id})">
-                    <span style="flex: 1; margin-left: 10px;">${p.name}</span>
-                    ${p.photo ? '📸' : ''}
-                </div>`
-            ).join('');
-            
-            if (toBuy.length === 0) {
-                shoppingContainer.innerHTML = '<div style="color: #999;">Список пуст</div>';
-            }
+        function selectCategory(category) {
+            currentCategory = category;
+            document.getElementById('expenseCategoryDisplay').innerHTML = `Категория: ${category}`;
+            document.getElementById('expenseModal').style.display = 'flex';
+            document.getElementById('categoryBlock').style.display = 'none';
         }
         
-        // ========== КАЛЕНДАРЬ ПРИВИВОК ==========
-        function updateVaccineCalendar() {
-            const container = document.getElementById('vaccineCalendar');
-            const vaccines = entries.filter(e => e.type === 'vaccine').sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            if (vaccines.length === 0) {
-                container.innerHTML = '<div style="color: #999; text-align: center;">Нет записей о прививках</div>';
-                return;
-            }
-            
-            container.innerHTML = vaccines.map(v => {
-                const child = children[v.childIndex]?.name || 'Неизвестно';
-                const date = new Date(v.date).toLocaleDateString('ru-RU');
-                const nextDate = v.nextDate ? new Date(v.nextDate).toLocaleDateString('ru-RU') : null;
-                
-                return `
-                    <div class="vaccine-item">
-                        <div><b>${child}</b> - ${v.title}</div>
-                        <div class="vaccine-date">Сделано: ${date}</div>
-                        ${nextDate ? `<div class="vaccine-date">Следующая: ${nextDate}</div>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function updateUpcomingVaccines() {
-            const container = document.getElementById('upcomingVaccines');
-            const today = new Date();
-            const threeMonths = new Date();
-            threeMonths.setMonth(threeMonths.getMonth() + 3);
-            
-            const upcoming = entries.filter(e => 
-                e.type === 'vaccine' && 
-                e.nextDate && 
-                new Date(e.nextDate) > today &&
-                new Date(e.nextDate) < threeMonths
-            ).sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
-            
-            if (upcoming.length === 0) {
-                container.innerHTML = '<div style="color: #999; text-align: center;">Нет ближайших прививок</div>';
-                return;
-            }
-            
-            container.innerHTML = upcoming.map(v => {
-                const child = children[v.childIndex]?.name || 'Неизвестно';
-                const nextDate = new Date(v.nextDate).toLocaleDateString('ru-RU');
-                return `
-                    <div style="background: #fff3e0; padding: 10px; border-radius: 8px; margin: 5px 0;">
-                        <div><b>${child}</b>: ${v.title}</div>
-                        <div style="font-size: 12px;">📅 ${nextDate}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // ========== ЗАПИСИ ==========
-        function showEntryForm(type) {
-            currentEntryType = type;
-            
-            const titles = {
-                'symptom': '🤒 Симптом',
-                'diagnosis': '🔬 Диагноз',
-                'prescription': '📋 Назначение',
-                'treatment': '🏥 Лечение',
-                'medicine': '💊 Лекарство',
-                'doctor': '👨‍⚕️ Врач',
-                'vaccine': '💉 Прививка'
-            };
-            
-            document.getElementById('modalTitle').innerHTML = titles[type];
-            
-            // Показываем/скрываем поля
-            document.getElementById('vaccineFields').style.display = type === 'vaccine' ? 'block' : 'none';
-            document.getElementById('pharmacyFields').style.display = 'none';
-            
-            // Заполняем теги
-            let tags = [];
-            if (type === 'symptom') tags = symptomTags;
-            else if (type === 'diagnosis') tags = diagnosisTags;
-            else if (type === 'prescription') tags = prescriptionTags;
-            else if (type === 'treatment') tags = treatmentTags;
-            else if (type === 'medicine') tags = medicineTags;
-            else if (type === 'doctor') tags = doctorTags;
-            else if (type === 'vaccine') tags = vaccineTags;
-            
-            const tagsContainer = document.getElementById('tagsContainer');
-            tagsContainer.innerHTML = tags.map(t => 
-                `<span class="tag-option" onclick="toggleTag(this, '${t}')">${t}</span>`
-            ).join('');
-            
-            const childSelect = document.getElementById('entryChild');
-            childSelect.innerHTML = '<option value="">Выберите ребенка</option>' + 
-                children.map((c, i) => `<option value="${i}" ${selectedChild === i ? 'selected' : ''}>${c.name}</option>`).join('');
-            
-            document.getElementById('entryDateTime').value = new Date().toISOString().slice(0, 16);
-            
-            document.getElementById('entryModal').style.display = 'flex';
-        }
-        
-        function addCustomTag() {
-            const customTag = document.getElementById('customTag').value;
-            if (customTag) {
-                const container = document.getElementById('tagsContainer');
-                const span = document.createElement('span');
-                span.className = 'tag-option selected';
-                span.onclick = function() { this.classList.toggle('selected'); };
-                span.textContent = customTag;
-                container.appendChild(span);
-                document.getElementById('customTag').value = '';
-            }
-        }
-        
-        function toggleTag(element, tag) {
-            element.classList.toggle('selected');
-        }
-        
-        function previewEntryPhoto(event) {
+        function previewPhoto(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     currentPhoto = e.target.result;
-                    document.getElementById('entryPhotoPreview').innerHTML = 
-                        `<img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 10px;">`;
+                    document.getElementById('photoPreview').innerHTML = 
+                        `<img src="${e.target.result}" class="photo-preview">`;
                 };
                 reader.readAsDataURL(file);
             }
         }
         
-        function saveEntry() {
-            const childIndex = document.getElementById('entryChild').value;
-            const title = document.getElementById('entryTitle').value;
-            const description = document.getElementById('entryDescription').value;
-            const temperature = document.getElementById('entryTemperature').value;
-            const medicine = document.getElementById('entryMedicine').value;
-            const dateTime = document.getElementById('entryDateTime').value;
+        function saveExpenseWithPhoto() {
+            let amount = document.getElementById('expenseAmount').value;
+            let note = document.getElementById('expenseNote').value;
             
-            if (!childIndex || !title) {
-                alert('Выберите ребенка и введите название!');
-                return;
+            if (amount && !isNaN(amount) && amount > 0) {
+                addTransaction('expense', currentCategory, Number(amount), note, currentPhoto);
+                closeExpenseModal();
+                showMessage('✅ Расход сохранен');
             }
-            
-            const selectedTags = [];
-            document.querySelectorAll('#tagsContainer .tag-option.selected').forEach(el => {
-                selectedTags.push(el.textContent);
-            });
-            
-            const entry = {
-                id: Date.now(),
-                childIndex: parseInt(childIndex),
-                type: currentEntryType,
-                title: title,
-                description: description,
-                tags: selectedTags,
-                temperature: temperature || null,
-                medicine: medicine || null,
-                date: dateTime || new Date().toISOString(),
-                photo: currentPhoto || null
-            };
-            
-            // Для прививок
-            if (currentEntryType === 'vaccine') {
-                entry.nextDate = document.getElementById('vaccineNextDate').value;
-                entry.vaccineStatus = document.getElementById('vaccineStatus').value;
-            }
-            
-            entries.push(entry);
-            
-            // Если это лекарство, добавляем в аптечку
-            if (currentEntryType === 'medicine' && medicine) {
-                addToPharmacy(medicine, currentPhoto, null, false);
-            }
-            
-            saveData();
-            closeEntryModal();
-            updateDisplay();
-            showMessage('✅ Запись добавлена');
         }
         
-        function deleteEntry(id) {
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').style.display = 'none';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseNote').value = '';
+            document.getElementById('photoPreview').innerHTML = '';
+            currentPhoto = null;
+        }
+        
+        function addTransaction(type, category, amount, note, photo) {
+            let transaction = {
+                id: Date.now(),
+                category: category,
+                amount: type === 'expense' ? -amount : amount,
+                note: note || '',
+                photo: photo || null,
+                date: new Date().toISOString()
+            };
+            
+            transactions.push(transaction);
+            saveData();
+            cleanupOldTransactions();
+            updateDisplay();
+        }
+        
+        function deleteTransaction(id) {
             if (confirm('Удалить?')) {
-                entries = entries.filter(e => e.id !== id);
+                transactions = transactions.filter(t => t.id !== id);
                 saveData();
                 updateDisplay();
                 showMessage('🗑️ Удалено');
             }
         }
         
-        // ========== ДЕТИ ==========
-        function showChildForm() {
-            document.getElementById('childModal').style.display = 'flex';
-        }
-        
-        function saveChild() {
-            const name = document.getElementById('childName').value;
-            const age = document.getElementById('childAge').value;
-            
-            if (name && age) {
-                children.push({
-                    name: name,
-                    age: parseInt(age),
-                    added: new Date().toISOString()
-                });
-                saveData();
-                closeChildModal();
-                loadChildren();
-                if (selectedChild === null) {
-                    selectedChild = 0;
-                }
+        // ========== БЮДЖЕТ ==========
+        function setBudget() {
+            let limit = prompt('Лимит на месяц:', budgetLimit);
+            if (limit && !isNaN(limit) && limit > 0) {
+                budgetLimit = Number(limit);
+                localStorage.setItem('budgetLimit', budgetLimit);
                 updateDisplay();
-                showMessage('👶 Ребенок добавлен');
             }
         }
         
-        // ========== ОТОБРАЖЕНИЕ ==========
-        function updateDisplay() {
-            loadChildren();
-            updateChildStats();
-            updatePharmacy();
-            updateVaccineCalendar();
-            updateUpcomingVaccines();
-            displayEntries();
-            updateDiagnosisHistory();
-            updateActivePrescriptions();
-            document.getElementById('currentMonthDisplay').innerHTML = 
-                getMonthName(selectedMonth.getMonth()) + ' ' + selectedMonth.getFullYear();
+        // ========== ЦЕЛИ ==========
+        function showGoalForm() {
+            document.getElementById('goalModal').style.display = 'flex';
         }
         
-        function updateChildStats() {
-            if (selectedChild === null || !children[selectedChild]) return;
+        function saveGoal() {
+            let name = document.getElementById('goalName').value;
+            let amount = parseFloat(document.getElementById('goalAmount').value);
             
-            const childEntries = entries.filter(e => e.childIndex === selectedChild);
-            
-            // Последняя болезнь
-            const diagnoses = childEntries.filter(e => e.type === 'diagnosis')
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            if (diagnoses.length > 0) {
-                const last = diagnoses[0];
-                const date = new Date(last.date).toLocaleDateString('ru-RU');
-                document.getElementById('lastIllness').innerHTML = `${last.title} (${date})`;
-            } else {
-                document.getElementById('lastIllness').innerHTML = 'Нет';
-            }
-            
-            // Температура
-            const temps = childEntries.filter(e => e.temperature).sort((a, b) => new Date(b.date) - new Date(a.date));
-            document.getElementById('lastTemp').innerHTML = temps.length ? temps[0].temperature + '°C' : '36.6°C';
-            
-            // Активный диагноз
-            const twoWeeksAgo = new Date();
-            twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-            const active = childEntries.filter(e => 
-                e.type === 'diagnosis' && new Date(e.date) > twoWeeksAgo
-            ).sort((a, b) => new Date(b.date) - new Date(a.date));
-            document.getElementById('activeDiagnosis').innerHTML = active.length ? active[0].title : 'Нет';
-            
-            // Следующая прививка
-            const today = new Date();
-            const nextVaccine = childEntries.filter(e => 
-                e.type === 'vaccine' && e.nextDate && new Date(e.nextDate) > today
-            ).sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
-            
-            if (nextVaccine.length > 0) {
-                const date = new Date(nextVaccine[0].nextDate).toLocaleDateString('ru-RU');
-                document.getElementById('nextVaccine').innerHTML = `${nextVaccine[0].title} (${date})`;
-            } else {
-                document.getElementById('nextVaccine').innerHTML = 'Нет';
-            }
-        }
-        
-        function displayEntries() {
-            const container = document.getElementById('entriesList');
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-            const typeFilter = document.getElementById('typeFilter').value;
-            const childFilter = document.getElementById('childFilter').value;
-            
-            let filtered = entries.filter(e => {
-                const entryDate = new Date(e.date);
-                const monthMatch = entryDate.getMonth() === selectedMonth.getMonth() &&
-                                 entryDate.getFullYear() === selectedMonth.getFullYear();
-                
-                if (!monthMatch) return false;
-                
-                if (childFilter !== 'all' && e.childIndex !== parseInt(childFilter)) return false;
-                if (typeFilter !== 'all' && e.type !== typeFilter) return false;
-                if (searchText) {
-                    const matches = e.title.toLowerCase().includes(searchText) ||
-                                  (e.description && e.description.toLowerCase().includes(searchText));
-                    if (!matches) return false;
+            if (name && amount > 0) {
+                if (!goals.some(g => g.name === name)) {
+                    goals.push({
+                        id: Date.now(),
+                        name: name,
+                        target: amount,
+                        saved: 0
+                    });
+                    saveData();
+                    updateDisplay();
+                    closeModal();
+                    showMessage('🎯 Цель добавлена');
+                } else {
+                    alert('Такая цель уже есть!');
                 }
-                
-                return true;
-            });
-            
-            if (filtered.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">Нет записей</div>';
-                return;
             }
-            
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            container.innerHTML = filtered.map(e => {
-                const child = children[e.childIndex] || { name: 'Неизвестно' };
-                const date = new Date(e.date).toLocaleString('ru-RU');
-                
-                const typeClasses = {
-                    'symptom': 'type-symptom', 'diagnosis': 'type-diagnosis',
-                    'prescription': 'type-prescription', 'treatment': 'type-treatment',
-                    'medicine': 'type-medicine', 'doctor': 'type-doctor', 'vaccine': 'type-vaccine'
-                };
-                
-                const typeNames = {
-                    'symptom': 'Симптом', 'diagnosis': 'Диагноз', 'prescription': 'Назначение',
-                    'treatment': 'Лечение', 'medicine': 'Лекарство', 'doctor': 'Врач', 'vaccine': 'Прививка'
-                };
-                
-                return `
-                    <div class="entry-item">
-                        <button class="delete-btn" onclick="deleteEntry(${e.id})">✕</button>
-                        <div class="entry-header">
-                            <span class="entry-child">${child.name}</span>
-                            <span class="entry-type ${typeClasses[e.type]}">${typeNames[e.type]}</span>
-                        </div>
-                        <div class="entry-title">${e.title}</div>
-                        ${e.temperature ? `<div class="entry-details">🌡️ ${e.temperature}°C</div>` : ''}
-                        ${e.medicine ? `<div class="entry-details">💊 ${e.medicine}</div>` : ''}
-                        ${e.description ? `<div class="entry-details">📝 ${e.description}</div>` : ''}
-                        ${e.tags ? `<div class="entry-tags">${e.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
-                        ${e.nextDate ? `<div class="entry-details">📅 Следующая: ${new Date(e.nextDate).toLocaleDateString()}</div>` : ''}
-                        <div class="entry-date">${date}</div>
-                        ${e.photo ? `<img src="${e.photo}" class="entry-photo" onclick="showPhoto('${e.photo}')">` : ''}
-                    </div>
-                `;
-            }).join('');
         }
         
-        function updateDiagnosisHistory() {
-            const container = document.getElementById('diagnosisHistory');
-            const diagnoses = entries.filter(e => e.type === 'diagnosis')
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 5);
-            
-            if (diagnoses.length === 0) {
-                container.innerHTML = '<div style="color: #999; text-align: center;">Нет истории</div>';
-                return;
+        function addToGoal(id) {
+            let goal = goals.find(g => g.id === id);
+            let amount = prompt(`Добавить к "${goal.name}":`);
+            if (amount && !isNaN(amount) && amount > 0) {
+                goal.saved += Number(amount);
+                saveData();
+                updateDisplay();
             }
-            
-            container.innerHTML = diagnoses.map(d => {
-                const child = children[d.childIndex]?.name || 'Неизвестно';
-                const date = new Date(d.date).toLocaleDateString('ru-RU');
-                return `
-                    <div style="background: #e1f5fe; padding: 10px; border-radius: 8px; margin: 5px 0;">
-                        <div><b>${child}</b>: ${d.title}</div>
-                        <div style="font-size: 12px;">${date}</div>
-                    </div>
-                `;
-            }).join('');
         }
         
-        function updateActivePrescriptions() {
-            const container = document.getElementById('activePrescriptionsList');
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            
-            const active = entries.filter(e => 
-                e.type === 'prescription' && new Date(e.date) > weekAgo
-            ).sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            if (active.length === 0) {
-                container.innerHTML = '<div style="color: #999; text-align: center;">Нет активных</div>';
-                return;
+        function deleteGoal(id) {
+            if (confirm('Удалить цель?')) {
+                goals = goals.filter(g => g.id !== id);
+                saveData();
+                updateDisplay();
             }
-            
-            container.innerHTML = active.map(p => {
-                const child = children[p.childIndex]?.name || 'Неизвестно';
-                const date = new Date(p.date).toLocaleDateString('ru-RU');
-                return `
-                    <div style="background: #fff3e0; padding: 10px; border-radius: 8px; margin: 5px 0;">
-                        <div><b>${child}</b>: ${p.title}</div>
-                        <div style="font-size: 12px;">${p.medicine || ''} · ${date}</div>
-                    </div>
-                `;
-            }).join('');
         }
         
-        // ========== ВСПОМОГАТЕЛЬНЫЕ ==========
-        function getMonthName(month) {
-            const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                           'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-            return months[month];
-        }
-        
-        function changeMonth(delta) {
-            selectedMonth.setMonth(selectedMonth.getMonth() + delta);
-            displayEntries();
-            document.getElementById('currentMonthDisplay').innerHTML = 
-                getMonthName(selectedMonth.getMonth()) + ' ' + selectedMonth.getFullYear();
-        }
-        
-        function applyFilters() {
-            displayEntries();
-        }
-        
+        // ========== ФОТО ==========
         function showPhoto(src) {
             document.getElementById('modalImage').src = src;
             document.getElementById('photoModal').style.display = 'flex';
@@ -1107,65 +537,207 @@
             document.getElementById('photoModal').style.display = 'none';
         }
         
-        function closeChildModal() {
-            document.getElementById('childModal').style.display = 'none';
-            document.getElementById('childName').value = '';
-            document.getElementById('childAge').value = '';
+        // ========== ПОИСК ==========
+        function searchTransactions() {
+            let text = document.getElementById('searchInput').value.toLowerCase();
+            displayTransactions(text);
         }
         
-        function closeEntryModal() {
-            document.getElementById('entryModal').style.display = 'none';
-            document.getElementById('entryTitle').value = '';
-            document.getElementById('entryDescription').value = '';
-            document.getElementById('entryTemperature').value = '';
-            document.getElementById('entryMedicine').value = '';
-            document.getElementById('customTag').value = '';
-            document.getElementById('entryPhotoPreview').innerHTML = '';
-            currentPhoto = null;
+        // ========== ЭКСПОРТ ==========
+        function exportToExcel() {
+            let csv = 'Дата;Категория;Сумма;Комментарий\n';
+            transactions.forEach(t => {
+                let date = new Date(t.date).toLocaleString('ru-RU');
+                csv += `${date};${t.category};${t.amount};${t.note}\n`;
+            });
+            
+            let blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'moi_dengi.csv';
+            link.click();
+        }
+        
+        function exportToJSON() {
+            let data = { transactions, goals, budgetLimit };
+            let blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'backup.json';
+            link.click();
+        }
+        
+        // ========== ОБНОВЛЕНИЕ ==========
+        function updateDisplay() {
+            let balance = transactions.reduce((sum, t) => sum + t.amount, 0);
+            document.getElementById('balance').innerHTML = balance + ' ₽';
+            
+            let totalIncome = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+            let totalExpense = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+            document.getElementById('totalIncome').innerHTML = totalIncome + ' ₽';
+            document.getElementById('totalExpense').innerHTML = totalExpense + ' ₽';
+            
+            // Расходы за текущий месяц (для правой панели)
+            const currentDate = new Date();
+            const currentMonthTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.getMonth() === currentDate.getMonth() &&
+                       transactionDate.getFullYear() === currentDate.getFullYear();
+            });
+            
+            const currentMonthExpense = currentMonthTransactions
+                .filter(t => t.amount < 0)
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+            document.getElementById('currentMonthExpense').innerHTML = currentMonthExpense + ' ₽';
+            
+            // Средний чек
+            let expenseCount = transactions.filter(t => t.amount < 0).length;
+            let avg = expenseCount > 0 ? Math.round(totalExpense / expenseCount) : 0;
+            document.getElementById('averageCheck').innerHTML = avg + ' ₽';
+            
+            // Бюджет
+            document.getElementById('spentMonth').innerHTML = currentMonthExpense;
+            document.getElementById('budgetRemaining').innerHTML = budgetLimit - currentMonthExpense;
+            
+            let percent = Math.min((currentMonthExpense / budgetLimit) * 100, 100);
+            document.getElementById('budgetProgress').style.width = percent + '%';
+            
+            updateChart();
+            updateGoals();
+            updateMonthStats();
+            displayTransactions();
+            updateMonthDisplay();
+            
+            document.getElementById('historyToggle').innerHTML = historyCollapsed ? '▶' : '▼';
+            document.getElementById('historyContent').className = historyCollapsed ? 'section-content collapsed' : 'section-content';
+            document.getElementById('goalsToggle').innerHTML = goalsCollapsed ? '▶' : '▼';
+            document.getElementById('goalsContent').className = goalsCollapsed ? 'section-content collapsed' : 'section-content';
+        }
+        
+        function displayTransactions(searchText = '') {
+            let container = document.getElementById('transactionsList');
+            
+            // Фильтруем по выбранному месяцу
+            let filtered = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.getMonth() === selectedMonth.getMonth() &&
+                       transactionDate.getFullYear() === selectedMonth.getFullYear();
+            });
+            
+            if (searchText) {
+                filtered = filtered.filter(t => 
+                    t.category.toLowerCase().includes(searchText) || 
+                    t.note.toLowerCase().includes(searchText)
+                );
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">Нет операций за этот месяц</div>';
+                return;
+            }
+            
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = filtered.map(t => {
+                let sign = t.amount > 0 ? '+' : '';
+                let color = t.amount > 0 ? '#4caf50' : '#f44336';
+                let date = new Date(t.date).toLocaleString('ru-RU');
+                
+                return `
+                    <div class="transaction-item">
+                        <button class="delete-btn" onclick="deleteTransaction(${t.id})">✕</button>
+                        <div class="transaction-header">
+                            <span class="transaction-category">${t.category}</span>
+                            <span class="transaction-amount" style="color: ${color}">${sign}${t.amount} ₽</span>
+                        </div>
+                        <div class="transaction-date">${date}</div>
+                        ${t.note ? `<div class="transaction-note">📝 ${t.note}</div>` : ''}
+                        ${t.photo ? `<img src="${t.photo}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; margin-top: 10px;" onclick="showPhoto('${t.photo}')">` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateChart() {
+            let chart = document.getElementById('categoryChart');
+            let expenses = transactions.filter(t => t.amount < 0);
+            
+            let cats = {};
+            expenses.forEach(t => cats[t.category] = (cats[t.category] || 0) + Math.abs(t.amount));
+            
+            if (Object.keys(cats).length === 0) {
+                chart.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">Нет расходов</div>';
+                return;
+            }
+            
+            let total = Object.values(cats).reduce((a, b) => a + b, 0);
+            
+            chart.innerHTML = Object.entries(cats).map(([cat, amt]) => {
+                let percent = (amt / total * 100).toFixed(1);
+                return `
+                    <div class="chart-item">
+                        <div class="chart-label">${cat}</div>
+                        <div class="chart-bar"><div class="chart-fill" style="width: ${percent}%;">${percent}%</div></div>
+                        <div style="min-width: 70px; text-align: right;">${amt} ₽</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateGoals() {
+            let container = document.getElementById('goalsList');
+            
+            if (goals.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Нет целей</div>';
+                return;
+            }
+            
+            container.innerHTML = goals.map(g => {
+                let percent = (g.saved / g.target * 100).toFixed(1);
+                return `
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-name">🎯 ${g.name}</span>
+                            <span>${g.saved} ₽ / ${g.target} ₽</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${percent}%; background: #ff9800;"></div></div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>${percent}%</span>
+                            <span>Осталось: ${g.target - g.saved} ₽</span>
+                        </div>
+                        <div class="goal-actions">
+                            <button onclick="addToGoal(${g.id})" style="flex:1; background:#4caf50; color:white;">➕ Добавить</button>
+                            <button onclick="deleteGoal(${g.id})" style="flex:1; background:#f44336; color:white;">✕ Удалить</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function closeModal() {
+            document.getElementById('goalModal').style.display = 'none';
+            document.getElementById('goalName').value = '';
+            document.getElementById('goalAmount').value = '';
         }
         
         function saveData() {
-            localStorage.setItem('health_children', JSON.stringify(children));
-            localStorage.setItem('health_entries', JSON.stringify(entries));
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('goals', JSON.stringify(goals));
         }
         
         function showMessage(text) {
-            const toast = document.createElement('div');
+            let toast = document.createElement('div');
             toast.className = 'toast';
             toast.innerHTML = text;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
         
-        function exportToCSV() {
-            let csv = 'Дата;Ребенок;Тип;Название;Описание;Температура;Лекарства;Теги\n';
-            entries.forEach(e => {
-                const child = children[e.childIndex]?.name || 'Неизвестно';
-                const date = new Date(e.date).toLocaleString('ru-RU');
-                const tags = e.tags ? e.tags.join(', ') : '';
-                csv += `${date};${child};${e.type};${e.title};${e.description || ''};${e.temperature || ''};${e.medicine || ''};${tags}\n`;
-            });
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'health.csv';
-            link.click();
-        }
-        
-        function exportToJSON() {
-            const data = { children, entries, pharmacy };
-            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'health_backup.json';
-            link.click();
-        }
-        
-        // ========== ЗАПУСК ==========
-        if (children.length > 0) {
-            selectedChild = 0;
-        }
-        loadChildren();
+        // Запуск
+        loadCategories();
+        cleanupOldTransactions();
         updateDisplay();
     </script>
 </body>
